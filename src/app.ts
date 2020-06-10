@@ -1,4 +1,4 @@
-import Eris, { Constants, VoiceChannel, VoiceConnection } from 'eris';
+import Eris, { Constants, TextChannel, VoiceChannel, VoiceConnection } from 'eris';
 import { joinVoiceChannel, leaveVoiceChannel, postUsage } from './functions';
 
 import { CronJob } from 'cron';
@@ -38,7 +38,7 @@ bot.on('messageCreate', async msg => {
       .filter(c => Constants.ChannelTypes.GUILD_VOICE === c.type)
       .map(c => c as VoiceChannel)
       .find(c => c.name === channelName);
-    console.log(`textChannelId: ${msg.channel.id}, voiceChannelId: ${voiceChannel?.id}, action: ${action}`);
+    console.log(`textChannelId: ${msg.channel.id}, voiceChannelId: ${voiceChannel?.id}, action: ${action}.`);
     if (!voiceChannel) {
       bot.createMessage(msg.channel.id, `ボイスチャンネル「${channelName}」が見つかりませんでした。`);
       return;
@@ -46,7 +46,7 @@ bot.on('messageCreate', async msg => {
 
     switch (action) {
       case 'start':
-        const connection = await joinVoiceChannel(bot, voiceChannel, msg);
+        const connection = await joinVoiceChannel(bot, voiceChannel, msg.channel as TextChannel);
         joinedChannels.set(voiceChannel.id, connection);
         break;
 
@@ -63,6 +63,15 @@ bot.on('messageCreate', async msg => {
   }
 });
 
+bot.on('voiceChannelSwitch', async (member, newChannel, oldChannel) => {
+  if (member.id === bot.user.id) {
+    console.log(`Switch voice channel from ${oldChannel.name}(${oldChannel.id}) to ${newChannel.name}(${newChannel.id}).`);
+    joinedChannels.delete(oldChannel.id);
+    const connection = await joinVoiceChannel(bot, newChannel);
+    joinedChannels.set(newChannel.id, connection);
+  }
+});
+
 new CronJob('0 0 * * * *', () => {
   console.log('Will belling chime.');
   joinedChannels.forEach(connection => {
@@ -73,7 +82,7 @@ new CronJob('0 0 * * * *', () => {
 exitHook(() => {
   console.log(`Will terminate bot.`);
   joinedChannels.forEach(async (_, channelId) => {
-    console.log(`Auto leave channel(${channelId})`);
+    console.log(`Auto leave channel(${channelId}).`);
     await leaveVoiceChannel(bot, channelId);
   });
 });

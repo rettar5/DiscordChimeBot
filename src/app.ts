@@ -51,6 +51,7 @@ bot.on('messageCreate', async msg => {
         break;
 
       case 'end':
+      case 'stop':
         await leaveVoiceChannel(bot, voiceChannel.id);
         joinedChannels.delete(voiceChannel.id);
         break;

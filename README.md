@@ -7,6 +7,7 @@ This bot rings chime every hour on Discord.
 ## Requirement
 
 - node.js
+- ffmpeg
 
 ## Usage
 

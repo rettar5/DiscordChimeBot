@@ -1,19 +1,15 @@
 import Eris = require('eris');
 
-export function joinVoiceChannel(
-  bot: Eris.Client,
-  voiceChannel: Eris.VoiceChannel,
-  textChannel?: Eris.TextChannel
-): Promise<Eris.VoiceConnection> {
+export function joinVoiceChannel(bot: Eris.Client, voiceChannelId: string, textChannel?: Eris.TextChannel): Promise<Eris.VoiceConnection> {
   return new Promise((_res, _rej) => {
     bot
-      .joinVoiceChannel(voiceChannel.id)
+      .joinVoiceChannel(voiceChannelId)
       .then(connection => {
-        console.log(`Joined to voice channel to ${voiceChannel.name}(${voiceChannel.id}).`);
+        console.log(`Joined to voice channel to ${voiceChannelId}.`);
         _res(connection);
       })
       .catch(error => {
-        console.error(`Could not join to voice channel ${voiceChannel.name}(${voiceChannel.id}).`, error);
+        console.error(`Could not join to voice channel ${voiceChannelId}.`, error);
         if (textChannel?.id) {
           bot.createMessage(textChannel.id, `ボイスチャンネル接続時にエラーが発生しました。\n${error?.message}`);
         }

@@ -27,38 +27,60 @@ const bot = Eris(discordToken, {
 
 bot.on('ready', () => {
   console.log('Ready!');
+  fs.readFile(
+    '.joinedChannelIds.json',
+    {
+      encoding: 'utf-8'
+    },
+    (error, str) => {
+      if (str) {
+        try {
+          JSON.parse(str).forEach(async (id: string) => {
+            const connection = await joinVoiceChannel(bot, id);
+            joinedChannels.set(id, connection);
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+  );
 });
 
 bot.on('messageCreate', async msg => {
   const [hotword, action, option] = (msg.content || '').split(' ');
   if (hotword === '!chime') {
-    const channels = await bot.getRESTGuildChannels(msg.guildID);
-    const channelName = option || msg.channel['name'];
-    const voiceChannel: VoiceChannel = (channels || [])
-      .filter(c => Constants.ChannelTypes.GUILD_VOICE === c.type)
-      .map(c => c as VoiceChannel)
-      .find(c => c.name === channelName);
-    console.log(`textChannelId: ${msg.channel.id}, voiceChannelId: ${voiceChannel?.id}, action: ${action}.`);
-    if (!voiceChannel) {
-      bot.createMessage(msg.channel.id, `ボイスチャンネル「${channelName}」が見つかりませんでした。`);
-      return;
-    }
+    try {
+      const channels = await bot.getRESTGuildChannels(msg.guildID);
+      const channelName = option || msg.channel['name'];
+      const voiceChannel: VoiceChannel = (channels || [])
+        .filter(c => Constants.ChannelTypes.GUILD_VOICE === c.type)
+        .map(c => c as VoiceChannel)
+        .find(c => c.name === channelName);
+      console.log(`textChannelId: ${msg.channel.id}, voiceChannelId: ${voiceChannel?.id}, action: ${action}.`);
+      if (!voiceChannel) {
+        bot.createMessage(msg.channel.id, `ボイスチャンネル「${channelName}」が見つかりませんでした。`);
+        return;
+      }
 
-    switch (action) {
-      case 'start':
-        const connection = await joinVoiceChannel(bot, voiceChannel, msg.channel as TextChannel);
-        joinedChannels.set(voiceChannel.id, connection);
-        break;
+      switch (action) {
+        case 'start':
+          const connection = await joinVoiceChannel(bot, voiceChannel.id, msg.channel as TextChannel);
+          joinedChannels.set(voiceChannel.id, connection);
+          break;
 
-      case 'end':
-      case 'stop':
-        await leaveVoiceChannel(bot, voiceChannel.id);
-        joinedChannels.delete(voiceChannel.id);
-        break;
+        case 'end':
+        case 'stop':
+          await leaveVoiceChannel(bot, voiceChannel.id);
+          joinedChannels.delete(voiceChannel.id);
+          break;
 
-      default:
-        await postUsage(bot, msg.channel.id);
-        break;
+        default:
+          await postUsage(bot, msg.channel.id);
+          break;
+      }
+    } catch (error) {
+      console.error(error);
     }
   }
 });
@@ -67,8 +89,12 @@ bot.on('voiceChannelSwitch', async (member, newChannel, oldChannel) => {
   if (member.id === bot.user.id) {
     console.log(`Switch voice channel from ${oldChannel.name}(${oldChannel.id}) to ${newChannel.name}(${newChannel.id}).`);
     joinedChannels.delete(oldChannel.id);
-    const connection = await joinVoiceChannel(bot, newChannel);
-    joinedChannels.set(newChannel.id, connection);
+    try {
+      const connection = await joinVoiceChannel(bot, newChannel.id);
+      joinedChannels.set(newChannel.id, connection);
+    } catch (error) {
+      console.error(error);
+    }
   }
 });
 
@@ -81,9 +107,15 @@ new CronJob('0 0 * * * *', () => {
 
 exitHook(() => {
   console.log(`Will terminate bot.`);
+  const ids = JSON.stringify(Array.from(joinedChannels.keys()));
+  fs.writeFileSync('.joinedChannelIds.json', ids);
   joinedChannels.forEach(async (_, channelId) => {
     console.log(`Auto leave channel(${channelId}).`);
-    await leaveVoiceChannel(bot, channelId);
+    try {
+      await leaveVoiceChannel(bot, channelId);
+    } catch (error) {
+      console.error(error);
+    }
   });
 });
 

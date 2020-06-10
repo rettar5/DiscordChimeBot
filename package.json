@@ -1,0 +1,25 @@
+{
+  "name": "chimebot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run tsc",
+    "tsc": "tsc -p tsconfig.json",
+    "start": "node dist/app.js"
+  },
+  "author": "rettar5",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/cron": "^1.7.2",
+    "@types/node": "^14.0.13",
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "cron": "^1.8.2",
+    "dotenv": "^8.2.0",
+    "eris": "^0.13.1",
+    "exit-hook": "^2.2.0"
+  }
+}

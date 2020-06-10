@@ -101,7 +101,11 @@ bot.on('voiceChannelSwitch', async (member, newChannel, oldChannel) => {
 new CronJob('0 0 * * * *', () => {
   console.log('Will belling chime.');
   joinedChannels.forEach(connection => {
-    connection.play(fs.createReadStream(chimeFilePath));
+    try {
+      connection.play(fs.createReadStream(chimeFilePath));
+    } catch (error) {
+      console.error(error);
+    }
   });
 }).start();
 

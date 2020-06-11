@@ -75,6 +75,14 @@ bot.on('messageCreate', async msg => {
           joinedChannels.delete(voiceChannel.id);
           break;
 
+        case 'ring':
+        case 'rings':
+          const con = joinedChannels.get(voiceChannel.id);
+          if (con) {
+            con.play(fs.createReadStream(chimeFilePath));
+          }
+          break;
+
         default:
           await postUsage(bot, msg.channel.id);
           break;

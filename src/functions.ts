@@ -27,7 +27,7 @@ export function leaveVoiceChannel(bot: Eris.Client, channelId: string): Promise<
 
 export function postUsage(bot: Eris.Client, channelId: string): Promise<void> {
   return new Promise((_res, _rej) => {
-    bot.createMessage(channelId, `Usage: !chime (start|end) [Optional]チャンネル名`);
+    bot.createMessage(channelId, `Usage: !chime (start|end|rings) [Optional]チャンネル名`);
     _res();
   });
 }

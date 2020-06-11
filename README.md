@@ -2,7 +2,7 @@
 
 ## Description
 
-This bot rings chime every hour on Discord.
+This bot rings the chime every hour on Discord.
 
 ## Requirement
 
@@ -11,8 +11,20 @@ This bot rings chime every hour on Discord.
 
 ## Usage
 
+### on Server
+
 ```
 $ npm start
+```
+
+### on Discord
+
+```
+!chime start
+```
+
+```
+!chime end
 ```
 
 ## Install

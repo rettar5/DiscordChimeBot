@@ -36,8 +36,7 @@ bot.on('ready', () => {
       if (str) {
         try {
           JSON.parse(str).forEach(async (id: string) => {
-            const connection = await joinVoiceChannel(bot, id);
-            joinedChannels.set(id, connection);
+            await joinVoiceChannel(bot, id, joinedChannels);
           });
         } catch (e) {
           console.error(e);
@@ -65,14 +64,12 @@ bot.on('messageCreate', async msg => {
 
       switch (action) {
         case 'start':
-          const connection = await joinVoiceChannel(bot, voiceChannel.id, msg.channel as TextChannel);
-          joinedChannels.set(voiceChannel.id, connection);
+          await joinVoiceChannel(bot, voiceChannel.id, joinedChannels, msg.channel as TextChannel);
           break;
 
         case 'end':
         case 'stop':
-          await leaveVoiceChannel(bot, voiceChannel.id);
-          joinedChannels.delete(voiceChannel.id);
+          await leaveVoiceChannel(bot, voiceChannel.id, joinedChannels);
           break;
 
         case 'ring':
@@ -98,8 +95,7 @@ bot.on('voiceChannelSwitch', async (member, newChannel, oldChannel) => {
     console.log(`Switch voice channel from ${oldChannel.name}(${oldChannel.id}) to ${newChannel.name}(${newChannel.id}).`);
     joinedChannels.delete(oldChannel.id);
     try {
-      const connection = await joinVoiceChannel(bot, newChannel.id);
-      joinedChannels.set(newChannel.id, connection);
+      await joinVoiceChannel(bot, newChannel.id, joinedChannels);
     } catch (error) {
       console.error(error);
     }
@@ -133,7 +129,7 @@ exitHook(() => {
   joinedChannels.forEach(async (_, channelId) => {
     console.log(`Auto leave channel(${channelId}).`);
     try {
-      await leaveVoiceChannel(bot, channelId);
+      await leaveVoiceChannel(bot, channelId, joinedChannels);
     } catch (error) {
       console.error(error);
     }

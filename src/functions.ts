@@ -21,12 +21,16 @@ export function joinVoiceChannel(
           }, reconnectDelay * 1000);
         };
         connection.once('error', error => {
-          console.error('connection error ', error);
-          reconnect();
+          console.error(`connection error ${voiceChannelId}.`, error);
+          if (error) {
+            reconnect();
+          }
         });
         connection.once('disconnect', error => {
-          console.warn('disconnect voice channel ', error);
-          reconnect();
+          console.warn(`disconnect voice channel ${voiceChannelId}.`, error);
+          if (error) {
+            reconnect();
+          }
         });
         _res(connection);
       })

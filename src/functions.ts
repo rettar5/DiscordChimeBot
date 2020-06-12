@@ -4,7 +4,8 @@ export function joinVoiceChannel(
   bot: Eris.Client,
   voiceChannelId: string,
   joinedChannels: Map<string, Eris.VoiceConnection>,
-  textChannel?: Eris.TextChannel
+  textChannel?: Eris.TextChannel,
+  reconnectDelay: number = 10
 ): Promise<Eris.VoiceConnection> {
   return new Promise((_res, _rej) => {
     bot
@@ -16,8 +17,8 @@ export function joinVoiceChannel(
           removeConnectionListeners(connection);
           setTimeout(() => {
             joinedChannels.delete(voiceChannelId);
-            joinVoiceChannel(bot, voiceChannelId, joinedChannels, textChannel);
-          }, 1000);
+            joinVoiceChannel(bot, voiceChannelId, joinedChannels, textChannel, reconnectDelay + 10);
+          }, reconnectDelay * 1000);
         };
         connection.once('error', error => {
           console.error('connection error ', error);
@@ -31,9 +32,6 @@ export function joinVoiceChannel(
       })
       .catch(error => {
         console.error(`Could not join to voice channel ${voiceChannelId}.`, error);
-        if (textChannel?.id) {
-          bot.createMessage(textChannel.id, `ボイスチャンネル接続時にエラーが発生しました。\n${error?.message}`);
-        }
         _rej(error);
       });
   });

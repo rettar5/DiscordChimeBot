@@ -110,7 +110,7 @@ bot.on('error', async (error, id) => {
     } catch (e) {
       console.error(e);
     }
-  }, 1000);
+  }, 10 * 1000);
 });
 
 new CronJob('0 0 * * * *', () => {

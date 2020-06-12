@@ -93,7 +93,7 @@ bot.on('messageCreate', async msg => {
 bot.on('voiceChannelSwitch', async (member, newChannel, oldChannel) => {
   if (member.id === bot.user.id) {
     console.log(`Switch voice channel from ${oldChannel.name}(${oldChannel.id}) to ${newChannel.name}(${newChannel.id}).`);
-    joinedChannels.delete(oldChannel.id);
+    await leaveVoiceChannel(bot, oldChannel.id, joinedChannels);
     try {
       await joinVoiceChannel(bot, newChannel.id, joinedChannels);
     } catch (error) {

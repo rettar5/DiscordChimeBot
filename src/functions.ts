@@ -13,16 +13,17 @@ export function joinVoiceChannel(
         console.log(`Joined to voice channel ${voiceChannelId}.`);
         joinedChannels.set(voiceChannelId, connection);
         const reconnect = () => {
+          removeConnectionListeners(connection);
           setTimeout(() => {
             joinedChannels.delete(voiceChannelId);
             joinVoiceChannel(bot, voiceChannelId, joinedChannels, textChannel);
           }, 1000);
         };
-        connection.on('error', error => {
+        connection.once('error', error => {
           console.error('connection error ', error);
           reconnect();
         });
-        connection.on('disconnect', error => {
+        connection.once('disconnect', error => {
           console.warn('disconnect voice channel ', error);
           reconnect();
         });
@@ -41,6 +42,10 @@ export function joinVoiceChannel(
 export function leaveVoiceChannel(bot: Eris.Client, channelId: string, joinedChannels: Map<string, Eris.VoiceConnection>): Promise<void> {
   return new Promise((_res, _rej) => {
     bot.leaveVoiceChannel(channelId);
+    const connection = joinedChannels.get(channelId);
+    if (connection) {
+      removeConnectionListeners(connection);
+    }
     joinedChannels.delete(channelId);
     _res();
   });
@@ -51,4 +56,9 @@ export function postUsage(bot: Eris.Client, channelId: string): Promise<void> {
     bot.createMessage(channelId, `Usage: !chime (start|end|rings) [Optional]チャンネル名`);
     _res();
   });
+}
+
+function removeConnectionListeners(connection: Eris.VoiceConnection) {
+  connection.removeAllListeners('error');
+  connection.removeAllListeners('disconnect');
 }

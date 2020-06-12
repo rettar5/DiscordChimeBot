@@ -104,11 +104,13 @@ bot.on('voiceChannelSwitch', async (member, newChannel, oldChannel) => {
 
 bot.on('error', async (error, id) => {
   console.error(`error shard id: ${id} `, error);
-  try {
-    await bot.connect();
-  } catch (e) {
-    console.error(e);
-  }
+  setTimeout(async () => {
+    try {
+      await bot.connect();
+    } catch (e) {
+      console.error(e);
+    }
+  }, 1000);
 });
 
 new CronJob('0 0 * * * *', () => {

@@ -9,6 +9,9 @@ require('dotenv').config();
 // Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
 const joinedChannels = new Map<string, VoiceConnection>();
+const playOptions: Eris.VoiceResourceOptions = {
+  inlineVolume: true
+};
 
 const discordToken = process.env.RETTAR5_DISCORD_CHIME_BOT_TOKEN;
 if (!discordToken) {
@@ -80,7 +83,7 @@ bot.on('messageCreate', async msg => {
         case 'rings':
           const con = joinedChannels.get(voiceChannel.id);
           if (con) {
-            con.play(fs.createReadStream(chimeFilePath));
+            con.play(fs.createReadStream(chimeFilePath), playOptions);
           }
           break;
 
@@ -121,7 +124,7 @@ new CronJob('0 0 * * * *', () => {
   console.log('Will belling chime.');
   joinedChannels.forEach(connection => {
     try {
-      connection.play(fs.createReadStream(chimeFilePath));
+      connection.play(fs.createReadStream(chimeFilePath), playOptions);
     } catch (error) {
       console.error(error);
     }

@@ -3,11 +3,11 @@ require('dotenv').config();
 const chimeVolume: number = (() => {
   const str = process.env.RETTAR5_DISCORD_CHIME_BOT_VOLUME;
   try {
-    const num = parseInt(str);
-    if (num < 0 || 2 < num) {
+    const num = parseFloat(str);
+    if (isNaN(num) || num < 0 || 2 < num) {
       throw Error('Invalid chime volume, Please set RETTAR5_DISCORD_CHIME_BOT_VOLUME in 0 < x < 2.');
     }
-    return;
+    return num;
   } catch (e) {
     console.warn(e);
     return 1;

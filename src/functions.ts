@@ -1,4 +1,18 @@
 import Eris = require('eris');
+require('dotenv').config();
+const chimeVolume: number = (() => {
+  const str = process.env.RETTAR5_DISCORD_CHIME_BOT_VOLUME;
+  try {
+    const num = parseInt(str);
+    if (num < 0 || 2 < num) {
+      throw Error('Invalid chime volume, Please set RETTAR5_DISCORD_CHIME_BOT_VOLUME in 0 < x < 2.');
+    }
+    return;
+  } catch (e) {
+    console.warn(e);
+    return 1;
+  }
+})();
 
 export function joinVoiceChannel(
   bot: Eris.Client,
@@ -13,6 +27,7 @@ export function joinVoiceChannel(
       .then(connection => {
         console.log(`Joined to voice channel ${voiceChannelId}.`);
         joinedChannels.set(voiceChannelId, connection);
+        connection.setVolume(chimeVolume);
         const reconnect = () => {
           removeConnectionListeners(connection);
           setTimeout(() => {

@@ -22,36 +22,43 @@ export function joinVoiceChannel(
   reconnectDelay: number = 10
 ): Promise<Eris.VoiceConnection> {
   return new Promise((_res, _rej) => {
+    const reconnect = (connection?: Eris.VoiceConnection) => {
+      if (connection) {
+        removeConnectionListeners(connection);
+      }
+      setTimeout(() => {
+        joinedChannels.delete(voiceChannelId);
+        joinVoiceChannel(bot, voiceChannelId, joinedChannels, textChannel, reconnectDelay + 10);
+      }, reconnectDelay * 1000);
+    };
     bot
       .joinVoiceChannel(voiceChannelId)
       .then(connection => {
         console.log(`Joined to voice channel ${voiceChannelId}.`);
         joinedChannels.set(voiceChannelId, connection);
         connection.setVolume(chimeVolume);
-        const reconnect = () => {
-          removeConnectionListeners(connection);
-          setTimeout(() => {
-            joinedChannels.delete(voiceChannelId);
-            joinVoiceChannel(bot, voiceChannelId, joinedChannels, textChannel, reconnectDelay + 10);
-          }, reconnectDelay * 1000);
-        };
+
         connection.on('error', error => {
           console.error(`connection error ${voiceChannelId}.`, error);
           if (error) {
-            reconnect();
+            reconnect(connection);
           }
         });
         connection.on('disconnect', error => {
           console.warn(`disconnect voice channel ${voiceChannelId}.`, error);
           if (error) {
-            reconnect();
+            reconnect(connection);
           }
         });
         _res(connection);
       })
       .catch(error => {
         console.error(`Could not join to voice channel ${voiceChannelId}.`, error);
-        _rej(error);
+        if (100 < reconnectDelay) {
+          _rej(error);
+          return;
+        }
+        reconnect();
       });
   });
 }

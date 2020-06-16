@@ -36,7 +36,11 @@ bot.on('ready', () => {
       if (str) {
         try {
           JSON.parse(str).forEach(async (id: string) => {
-            await joinVoiceChannel(bot, id, joinedChannels);
+            try {
+              await joinVoiceChannel(bot, id, joinedChannels);
+            } catch (e) {
+              console.error(e);
+            }
           });
         } catch (e) {
           console.error(e);

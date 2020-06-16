@@ -35,13 +35,13 @@ export function joinVoiceChannel(
             joinVoiceChannel(bot, voiceChannelId, joinedChannels, textChannel, reconnectDelay + 10);
           }, reconnectDelay * 1000);
         };
-        connection.once('error', error => {
+        connection.on('error', error => {
           console.error(`connection error ${voiceChannelId}.`, error);
           if (error) {
             reconnect();
           }
         });
-        connection.once('disconnect', error => {
+        connection.on('disconnect', error => {
           console.warn(`disconnect voice channel ${voiceChannelId}.`, error);
           if (error) {
             reconnect();

@@ -40,15 +40,9 @@ export function joinVoiceChannel(
 
         connection.on('error', error => {
           console.error(`connection error ${voiceChannelId}.`, error);
-          if (error) {
-            reconnect(connection);
-          }
         });
         connection.on('disconnect', error => {
           console.warn(`disconnect voice channel ${voiceChannelId}.`, error);
-          if (error) {
-            reconnect(connection);
-          }
         });
         _res(connection);
       })

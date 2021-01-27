@@ -23,6 +23,7 @@ if (!chimeFilePath || !fs.existsSync(chimeFilePath)) {
   console.error('Could not find of chime file.\nPlease check your environment variables of "RETTAR5_DISCORD_CHIME_BOT_FILE_PATH".');
   process.exit(1);
 }
+const chimeHotword = process.env.RETTAR5_DISCORD_CHIME_BOT_HOTWORD || '!chime';
 
 const bot = Eris(discordToken, {
   restMode: true
@@ -55,7 +56,7 @@ bot.on('ready', () => {
 
 bot.on('messageCreate', async msg => {
   const [hotword, action, option] = (msg.content || '').split(' ');
-  if (hotword === '!chime') {
+  if (hotword === chimeHotword) {
     try {
       const channels = await bot.getRESTGuildChannels(msg.guildID);
       const channelName = option || msg.channel['name'];
